@@ -6,11 +6,12 @@ d3.json(url).then(function(data) {
     console.log(data);
 });
 
-// Initial page
+// Initial page function
 function init() {
     info(0);
     barGraph(0);
-    // Populate dropdown
+    bubbleChart(0);
+    // Populate dropdown options from data
     d3.json(url).then(function(data) {
         for (let i = 0; i < data.names.length; i++) {
             d3.select("#selDataset").append("option").text(data.names[i])
@@ -24,6 +25,7 @@ function optionChanged(id) {
         let index = data.names.indexOf(id)
         info(index)
         barGraph(index)
+        bubbleChart(index)
     });
 };
 
@@ -58,17 +60,46 @@ function barGraph(index) {
             type: "bar",
             orientation: "h"
         }];
-                // let layout = {
-        //     }
-        // };
-        Plotly.newPlot("bar", traceData);
+        let layout = {
+            margin: {
+                l:100,
+                r: 100
+            }                
+        };
+        Plotly.newPlot("bar", traceData, layout);
+    });
+};
+
+// Bubble Chart function
+function bubbleChart(index) {
+    d3.json(url).then(function(data) {
+        x = []
+        y = []
+        ht = []
+        for (let i = 0; i < data.names.length; i++) {
+            x.push(data.samples[index].otu_ids[i]);
+            y.push(data.samples[index].sample_values[i]);
+            ht.push(data.samples[index].otu_labels[i]);
+        };
+        let traceData = [{
+            x: x,
+            y: y,
+            hovertext: ht,
+            mode: "markers",
+            marker: {
+                size: y,
+                color: x,
+                sizeref: 1.5
+            }
+        }];
+        let layout = {
+            height: 500,
+            xaxis: {
+                title: "OTU ID"
+            }    
+        }
+        Plotly.newPlot("bubble", traceData, layout);
     });
 };
 
 init();
-
-// console.log(data.names[0]);
-// console.log(data.metadata[0].id)
-// console.log(data.samples[0].otu_ids[0]);
-// console.log(data.samples[0].otu_ids[1]);
-// console.log(data.samples[0].otu_ids[2]);
